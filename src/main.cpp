@@ -1,7 +1,7 @@
 #include <uWS/uWS.h>
 #include <iostream>
 #include "json.hpp"
-#include <math.h>
+#include <cmath>
 #include "particle_filter.h"
 
 using namespace std;
@@ -116,9 +116,10 @@ int main()
 
 		  // Calculate and output the average weighted error of the particle filter over all time steps so far.
 		  vector<Particle> particles = pf.particles;
-		  int num_particles = particles.size();
+		  auto num_particles = particles.size();
 		  double highest_weight = -1.0;
-		  Particle best_particle;
+          Particle dummy_particle(0, 0, 0, 0);
+          Particle& best_particle = dummy_particle;
 		  double weight_sum = 0.0;
 		  for (int i = 0; i < num_particles; ++i) {
 			if (particles[i].weight > highest_weight) {

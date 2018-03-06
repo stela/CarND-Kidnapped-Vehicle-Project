@@ -12,7 +12,12 @@
 #include "helper_functions.h"
 
 struct Particle {
-
+	Particle(const int id, const double x, const double y, const double theta)
+			: id(id), x(x), y(y), theta(theta), weight(1.) {
+		sense_x.push_back(x);
+		sense_y.push_back(y);
+		// TODO associations update here?
+	}
 	int id;
 	double x;
 	double y;
@@ -28,7 +33,7 @@ struct Particle {
 class ParticleFilter {
 	
 	// Number of particles to draw
-	int num_particles; 
+	const int num_particles;
 	
 	
 	
@@ -45,7 +50,8 @@ public:
 
 	// Constructor
 	// @param num_particles Number of particles
-	ParticleFilter() : num_particles(0), is_initialized(false) {}
+	// TODO increase from 3 to 1000 (?) particles
+	ParticleFilter() : num_particles(3), is_initialized(false) {}
 
 	// Destructor
 	~ParticleFilter() {}
