@@ -57,6 +57,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
     //  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
     //  http://www.cplusplus.com/reference/random/default_random_engine/
 
+    // TODO Formulas in Lesson 15: 8. Calculate Prediction Step Quiz Explanation
 }
 
 void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {

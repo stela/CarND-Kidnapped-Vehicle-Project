@@ -34,17 +34,15 @@ class ParticleFilter {
 	
 	// Number of particles to draw
 	const int num_particles;
-	
-	
-	
+
 	// Flag, if filter is initialized
 	bool is_initialized;
-	
+
 	// Vector of weights of all particles
 	std::vector<double> weights;
-	
+
 public:
-	
+
 	// Set of current particles
 	std::vector<Particle> particles;
 
@@ -77,14 +75,6 @@ public:
 	 * @param yaw_rate Yaw rate of car from t to t+1 [rad/s]
 	 */
 	void prediction(double delta_t, double std_pos[], double velocity, double yaw_rate);
-	
-	/**
-	 * dataAssociation Finds which observations correspond to which landmarks (likely by using
-	 *   a nearest-neighbors data association).
-	 * @param predicted Vector of predicted landmark observations
-	 * @param observations Vector of landmark observations
-	 */
-	void dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations);
 	
 	/**
 	 * updateWeights Updates the weights for each particle based on the likelihood of the 
@@ -121,6 +111,15 @@ public:
 	const bool initialized() const {
 		return is_initialized;
 	}
+
+private:
+    /**
+     * dataAssociation Finds which observations correspond to which landmarks (likely by using
+     *   a nearest-neighbors data association).
+     * @param predicted Vector of predicted landmark observations
+     * @param observations Vector of landmark observations
+     */
+    void dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations);
 };
 
 
