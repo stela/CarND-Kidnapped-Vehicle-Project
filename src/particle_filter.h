@@ -33,7 +33,7 @@ struct Particle {
 class ParticleFilter {
 	
 	// Number of particles to draw
-	const int num_particles;
+	const size_t num_particles;
 
 	// Flag, if filter is initialized
 	bool is_initialized;
@@ -48,8 +48,7 @@ public:
 
 	// Constructor
 	// @param num_particles Number of particles
-	// TODO increase from 3 to 1000 (?) particles
-	ParticleFilter() : num_particles(3), is_initialized(false) {}
+	ParticleFilter() : num_particles(100), is_initialized(false) {}
 
 	// Destructor
 	~ParticleFilter() {}

@@ -83,11 +83,24 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 }
 
 void ParticleFilter::resample() {
-    // TODO: Resample particles with replacement with probability proportional to their weight. 
-    // NOTE: You may find std::discrete_distribution helpful here.
-    //   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
-  // TODO see python resampling-algorithm in Lesson 14: 20. Quiz: Resampling Wheel - answer
+    // Resamples particles with replacement with probability proportional to their weight.
+    // Based on python resampling-algorithm in
+    // Lesson 14: Particle filters - 20. Quiz: Resampling Wheel - answer
 
+    // TODO if gen and distribution are heavy-weight(?) turn them into singletons
+    default_random_engine gen;
+    // See http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
+    discrete_distribution<int> distribution(weights.begin(), weights.end());
+
+    // double-buffer particles instead in case allocating and copying proves too slow
+    vector<Particle> resample_particles;
+    resample_particles.reserve(particles.size());
+    for (const auto &ignore : particles) {
+        // distribution.operator() is overridden to return a random (weighted) index
+        resample_particles.push_back(particles[distribution(gen)]);
+    }
+
+    particles = resample_particles;
 }
 
 Particle ParticleFilter::SetAssociations(Particle& particle, const std::vector<int>& associations, 
