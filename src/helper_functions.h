@@ -42,7 +42,8 @@ struct ground_truth {
  * Struct representing one landmark observation measurement.
  */
 struct LandmarkObs {
-	
+	LandmarkObs(int id, double x, double y) : id(id), x(x), y(y) {};
+	LandmarkObs(double x, double y) : x(x), y(y) {};
 	int id;				// Id of matching landmark in the map.
 	double x;			// Local (vehicle coordinates) x position of landmark observation [m]
 	double y;			// Local (vehicle coordinates) y position of landmark observation [m]
@@ -229,11 +230,7 @@ inline bool read_landmark_data(std::string filename, std::vector<LandmarkObs>& o
 		iss_obs >> local_y;
 
 		// Declare single landmark measurement:
-		LandmarkObs meas;
-
-		// Set values
-		meas.x = local_x;
-		meas.y = local_y;
+		LandmarkObs meas(local_x, local_y);
 
 		// Add to list of control measurements:
 		observations.push_back(meas);
