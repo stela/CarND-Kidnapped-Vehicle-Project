@@ -114,12 +114,12 @@ int main()
           Particle dummy_particle(0, 0, 0, 0);
           Particle& best_particle = dummy_particle;
 		  double weight_sum = 0.0;
-		  for (int i = 0; i < num_particles; ++i) {
-			if (particles[i].weight > highest_weight) {
-				highest_weight = particles[i].weight;
-				best_particle = particles[i];
+		  for (const auto &particle : particles) {
+			if (particle.weight > highest_weight) {
+				highest_weight = particle.weight;
+				best_particle = particle;
 			}
-			weight_sum += particles[i].weight;
+			weight_sum += particle.weight;
 		  }
 		  cout << "highest w " << highest_weight << endl;
 		  cout << "average w " << weight_sum/num_particles << endl;

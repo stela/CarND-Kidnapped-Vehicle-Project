@@ -13,7 +13,7 @@
 
 struct Particle {
 	Particle(const int id, const double x, const double y, const double theta)
-			: id(id), x(x), y(y), theta(theta), weight(1.) {
+			: id(id), x(x), y(y), theta(theta), weight(1.0) {
 		sense_x.push_back(x);
 		sense_y.push_back(y);
 		// TODO associations update here?
@@ -47,8 +47,11 @@ public:
 	std::vector<Particle> particles;
 
 	// Constructor
-	// @param num_particles Number of particles
-	ParticleFilter() : num_particles(100), is_initialized(false) {}
+    // Around 100-1000 particles ought to be enough
+	ParticleFilter() : num_particles(100), is_initialized(false) {
+        weights.reserve(num_particles);
+        particles.reserve(num_particles);
+    }
 
 	// Destructor
 	~ParticleFilter() {}
