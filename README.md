@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/stela/CarND-Kidnapped-Vehicle-Project.svg?branch=master)](https://travis-ci.org/stela/CarND-Kidnapped-Vehicle-Project)
+
 # Overview
 This repository contains all the code needed to complete the final project for the Localization course in Udacity's Self-Driving Car Nanodegree.
 
