@@ -4,6 +4,29 @@ language: cpp
 # As of 2017-07-18, Ubuntu Trusty 14.04 LTS is default environment. Xenial 16.04 LTS isn't supported yet :(
 #dist: xenial
 
+# "JSON for Modern C++" Only support gcc 4.9+, Trusty ships with gcc-4.8
+# CXX and CC env vars will point to g++/gcc and clang++/clang
+compiler:
+  - clang
+  - gcc
+
 script:
   - ./install-ubuntu.sh
   - ./build.sh
+
+# Use gcc 5.x just like Ubuntu Xenial
+matrix:
+  include:
+    # works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+
+before_install:
+    - eval "${MATRIX_EVAL}"
