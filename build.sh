@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xe
 # Script to build all components from scratch, using the maximum available CPU power
 #
 # Given parameters are passed over to CMake.
@@ -16,4 +16,4 @@ cd `dirname $0`
 mkdir -p build
 cd build
 cmake ..
-make -j `nproc` $*
+make $*
