@@ -3,9 +3,6 @@ sudo: required
 language: cpp
 dist: xenial
 
-services:
-  - docker
-
 script:
   - ./install-ubuntu.sh
   - ./build.sh
