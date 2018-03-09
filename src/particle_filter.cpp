@@ -136,6 +136,9 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
             trans_observations.push_back(trans_obs);
         }
 
+        // Initialize weight to 1.0, then scale it per-observation further down
+        particles[p].weight = 1.0;
+
         // if there are no observations, keep previous weights
         for (int i = 0; i < trans_observations.size(); i++) {
             double closest_dist = sensor_range;
@@ -164,10 +167,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                 const double std_x = std_landmark[0];
                 const double std_y = std_landmark[1];
                 const long double multiplier =
-                        1 / (2 * M_PI * std_x * std_y)
+                        1 / (2.0 * M_PI * std_x * std_y)
                             * exp(-(pow(meas_x - mu_x, 2.0) / (2 * pow(std_x, 2.0))
                                     + pow(meas_y - mu_y, 2.0) / (2 * pow(std_y, 2.0))));
-                if (multiplier > 0) {
+                if (multiplier > 0.0) {
                     particles[p].weight *= multiplier;
                 }
                 associations.push_back(association + 1);
