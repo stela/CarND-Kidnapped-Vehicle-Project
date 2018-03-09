@@ -5,6 +5,7 @@
  *      Author: Tiffany Huang
  */
 
+#define _USE_MATH_DEFINES
 #include <random>
 #include <algorithm>
 #include <iostream>
@@ -135,8 +136,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
             trans_observations.push_back(trans_obs);
         }
 
-        particles[p].weight = 1.0;
-
+        // if there are no observations, keep previous weights
         for (int i = 0; i < trans_observations.size(); i++) {
             double closest_dist = sensor_range;
             int association = 0;
@@ -145,8 +145,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                 double landmark_x = map_landmarks.landmark_list[j].x_f;
                 double landmark_y = map_landmarks.landmark_list[j].y_f;
 
-                // TODO lookup distance calculation from lessons
-                double calc_dist = sqrt(pow(trans_observations[i].x - landmark_x, 2.0) + pow(trans_observations[i].?));
+                // using euclidean distance for simplicity, could be adjusted for sensor-noise-distribution
+                double calc_dist =
+                        sqrt(pow(trans_observations[i].x - landmark_x, 2.0)
+                             + pow(trans_observations[i].y - landmark_y, 2.0));
                 if (calc_dist < closest_dist) {
                     closest_dist = calc_dist;
                     association = j;
@@ -158,9 +160,13 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                 double meas_y = trans_observations[i].y;
                 double mu_x = map_landmarks.landmark_list[association].x_f;
                 double mu_y = map_landmarks.landmark_list[association].y_f;
-                // TODO look up multiplier calculation from lessons: (Transformations and Associations)
+                // From Lesson 15: Implementation of a Particle Filter - 18. Quiz: Particle Weights
+                const double std_x = std_landmark[0];
+                const double std_y = std_landmark[1];
                 const long double multiplier =
-                        1 / (2_M_PI * std_landmark[0] * std_landmark[1]) * exp(-(pow(meas_x - )));
+                        1 / (2 * M_PI * std_x * std_y)
+                            * exp(-(pow(meas_x - mu_x, 2.0) / (2 * pow(std_x, 2.0))
+                                    + pow(meas_y - mu_y, 2.0) / (2 * pow(std_y, 2.0))));
                 if (multiplier > 0) {
                     particles[p].weight *= multiplier;
                 }
@@ -168,10 +174,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                 sense_x.push_back(trans_observations[i].x);
                 sense_y.push_back(trans_observations[i].y);
             }
-
-            particles[p] = SetAssociations(particles[p], associations, sense_x, sense_y);
-            weights[p] = particles[p].weight;
         }
+
+        particles[p] = SetAssociations(particles[p], associations, sense_x, sense_y);
+        weights[p] = particles[p].weight;
     }
 }
 
