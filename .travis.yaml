@@ -1,0 +1,10 @@
+sudo: required
+
+language: cpp
+
+services:
+  - docker
+
+script:
+  - ./install-ubuntu.sh
+  - ./build.sh
