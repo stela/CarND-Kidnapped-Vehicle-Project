@@ -1,7 +1,8 @@
 sudo: required
 
 language: cpp
-dist: xenial
+# As of 2017-07-18, Ubuntu Trusty 14.04 LTS is default environment. Xenial 16.04 LTS isn't supported yet :(
+#dist: xenial
 
 script:
   - ./install-ubuntu.sh
