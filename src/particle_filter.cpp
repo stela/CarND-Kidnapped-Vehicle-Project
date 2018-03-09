@@ -62,7 +62,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
     //  http://www.cplusplus.com/reference/random/default_random_engine/
 
     default_random_engine gen;
-    for (auto p : particles) {
+    for (auto &p : particles) {
         double new_x;
         double new_y;
         double new_theta;
@@ -142,7 +142,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         // if there are no observations, keep previous weights
         for (int i = 0; i < trans_observations.size(); i++) {
             double closest_dist = sensor_range;
-            int association = 0;
+            int association = -1;
 
             for (int j = 0; j < map_landmarks.landmark_list.size(); j++) {
                 double landmark_x = map_landmarks.landmark_list[j].x_f;
@@ -158,7 +158,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                 }
             }
 
-            if (association != 0) {
+            if (association != -1) {
                 double meas_x = trans_observations[i].x;
                 double meas_y = trans_observations[i].y;
                 double mu_x = map_landmarks.landmark_list[association].x_f;
@@ -170,12 +170,15 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                         1 / (2.0 * M_PI * std_x * std_y)
                             * exp(-(pow(meas_x - mu_x, 2.0) / (2 * pow(std_x, 2.0))
                                     + pow(meas_y - mu_y, 2.0) / (2 * pow(std_y, 2.0))));
-                if (multiplier > 0.0) {
+                if (multiplier >= 0.0) {
                     particles[p].weight *= multiplier;
                 }
                 associations.push_back(association + 1);
                 sense_x.push_back(trans_observations[i].x);
                 sense_y.push_back(trans_observations[i].y);
+            } else {
+                // remove any non-associated particles
+                particles[p].weight = 0.0;
             }
         }
 
