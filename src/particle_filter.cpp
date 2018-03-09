@@ -20,8 +20,8 @@
 using namespace std;
 
 void ParticleFilter::init(double x, double y, double theta, const double std[]) {
-    // TODO: Initialize all particles to first position (based on estimates of
-    //   x, y, theta and their uncertainties from GPS) and all weights to 1. 
+    // Initialize all particles to first position (based on estimates of
+    // x, y, theta and their uncertainties from GPS) and all weights to 1.
     // Add random Gaussian noise to each particle.
     // NOTE: Consult particle_filter.h for more information about this method (and others in this file).
 
@@ -55,40 +55,41 @@ void ParticleFilter::init(double x, double y, double theta, const double std[]) 
 }
 
 void ParticleFilter::prediction(double delta_t, double std_pos[], double velocity, double yaw_rate) {
-    // TODO: Add measurements to each particle and add random Gaussian noise.
+    // Adds measurements to each particle and add random Gaussian noise.
     // NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
     //  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
     //  http://www.cplusplus.com/reference/random/default_random_engine/
 
-    // TODO Formulas in Lesson 15: 8. Calculate Prediction Step Quiz Explanation
-
-    // TODO load std_post[0..2] into std_dev into normal_distributions here and in init(), extract fn
-
     default_random_engine gen;
-    for (int i = 0; i < num_particles; i++) {
+    for (auto p : particles) {
         double new_x;
         double new_y;
         double new_theta;
-
-        // TODO for really small yaw_rate
+      
         if (yaw_rate == 0.0) {
-            new_x = particles[i].x + velocity * delta_t * cos(particles[i].theta);
-            new_y = particles[i].y + velocity * delta_t * sin(particles[i].theta);
+            // Formulas in Lesson 13 Motion Models - 3. Yaw Rate and Velocity
+            new_x = p.x + velocity * delta_t * cos(p.theta);
+            new_y = p.y + velocity * delta_t * sin(p.theta);
+            // if zero yaw, theta stays the same
+            new_theta = p.theta;
         } else {
-            // TODO lookup complete formula from lesson
-            new_x = particles[i].x + velocity / yaw_rate * sin(particles[i].theta + yaw_rate * delta_t) - sin();
-            // TODO looks numerically unstable? dividing by very small yaw_rate if theta low
-            new_y = particles[i].y + velocity / yaw_rate * cos(particles[i].theta) - cos(particles[i].theta) ...;
-            new_theta = particles[i].theta + yaw_rate * delta_t;
+            // Formulas in Lesson 15: 8. Calculate Prediction Step Quiz Explanation
+            new_x = p.x + velocity / yaw_rate * (sin(p.theta + yaw_rate * delta_t) - sin(p.theta));
+            // looks numerically unstable when theta is small, if problematic approximate zero-comparison above
+            new_y = p.y + velocity / yaw_rate * (cos(p.theta) - cos(p.theta + yaw_rate * delta_t));
+            new_theta = p.theta + yaw_rate * delta_t;
         }
 
-        normal_distribution<double> N_x(new_x, std_pos[0]);
-        normal_distribution<double> N_y(new_y, std_pos[1]);
-        normal_distribution<double> N_theta(new_theta, std_pos[2]);
+        double std_x = std_pos[0];
+        double std_y = std_pos[1];
+        double std_theta = std_pos[2];
+        normal_distribution<double> N_x(new_x, std_x);
+        normal_distribution<double> N_y(new_y, std_y);
+        normal_distribution<double> N_theta(new_theta, std_theta);
 
-        particles[i].x = N_x(gen);
-        particles[i].y = N_y(gen);
-        particles[i].theta =  N_theta(gen);
+        p.x = N_x(gen);
+        p.y = N_y(gen);
+        p.theta =  N_theta(gen);
     }
 }
 
@@ -114,27 +115,23 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     //   http://planning.cs.uiuc.edu/node99.html
 
 
-    // TODO for each particle and associated weight:
-    //   TODO Use setAssociations() to set associations
-    //   TODO Update weights[i] and particles[i].weight
+    // for each particle and associated weight:
+    //   Use setAssociations() to set associations
+    //   Update weights[i] and particles[i].weight
     for (int p = 0; p < num_particles; p++) {
-
-        // TODO missing code?
-
         vector<int> associations;
         vector<double> sense_x;
         vector<double> sense_y;
 
         vector<LandmarkObs> trans_observations;
-        LandmarkObs obs;
         for (int i = 0; i < observations.size(); i++) {
-            LandmarkObs trans_obs;
-            obs = observations[]
+            LandmarkObs obs = observations[i];
 
             // vehicle-to-map coordinate space transformation
-            // TODO Look into using real matrix + vector here? overkill? Put offset last instead
-            trans_obs.y = particles[p].x + (obs.x * cos(particles[p].theta) - obs.y * sin(particles[p].theta));
-            trans_obs.x = particles[p].y + (obs.x * sin(particles[p].theta) + obs.y * cos(particles[p].theta));
+            const double theta = particles[p].theta;
+            double obs_x = particles[p].x + (obs.x * cos(theta) - obs.y * sin(theta));
+            double obs_y = particles[p].y + (obs.x * sin(theta) + obs.y * cos(theta));
+            LandmarkObs trans_obs(i, obs_x, obs_y);
             trans_observations.push_back(trans_obs);
         }
 
