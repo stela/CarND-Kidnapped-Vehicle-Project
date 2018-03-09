@@ -8,7 +8,7 @@ language: cpp
 # CXX and CC env vars will point to g++/gcc and clang++/clang
 compiler:
   - clang
-  - gcc
+#  - gcc
 
 script:
   - ./install-ubuntu.sh
