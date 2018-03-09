@@ -16,7 +16,6 @@ struct Particle {
 			: id(id), x(x), y(y), theta(theta), weight(1.0) {
 		sense_x.push_back(x);
 		sense_y.push_back(y);
-		// TODO associations update here?
 	}
 	int id;
 	double x;
@@ -47,16 +46,16 @@ public:
 	std::vector<Particle> particles;
 
 	// Constructor
-    // Around 100-1000 particles ought to be enough
+    // Around 40-1000 particles all work, 100 nice compromise speed/accuracy
 	ParticleFilter() : num_particles(100), is_initialized(false) {
         weights.reserve(num_particles);
         particles.reserve(num_particles);
     }
 
 	// Destructor
-	~ParticleFilter() {}
+	~ParticleFilter() = default;
 
-	/**
+    /**
 	 * init Initializes particle filter by initializing particles to Gaussian
 	 *   distribution around first position and all the weights to 1.
 	 * @param x Initial x position [m] (simulated estimate from GPS)
@@ -76,7 +75,7 @@ public:
 	 * @param velocity Velocity of car from t to t+1 [m/s]
 	 * @param yaw_rate Yaw rate of car from t to t+1 [rad/s]
 	 */
-	void prediction(double delta_t, double std_pos[], double velocity, double yaw_rate);
+	void prediction(double delta_t, const double std_pos[], double velocity, double yaw_rate);
 	
 	/**
 	 * updateWeights Updates the weights for each particle based on the likelihood of the 
@@ -86,7 +85,7 @@ public:
 	 * @param observations Vector of landmark observations
 	 * @param map Map class containing map landmarks
 	 */
-	void updateWeights(double sensor_range, double std_landmark[], const std::vector<LandmarkObs> &observations,
+	void updateWeights(double sensor_range, const double std_landmark[], const std::vector<LandmarkObs> &observations,
 			const Map &map_landmarks);
 	
 	/**
@@ -115,6 +114,8 @@ public:
 	}
 
 private:
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
     /**
      * dataAssociation Finds which observations correspond to which landmarks (likely by using
      *   a nearest-neighbors data association).
@@ -122,8 +123,7 @@ private:
      * @param observations Vector of landmark observations
      */
     void dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations);
+#pragma clang diagnostic pop
 };
-
-
 
 #endif /* PARTICLE_FILTER_H_ */

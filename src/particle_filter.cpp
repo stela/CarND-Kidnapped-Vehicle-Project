@@ -5,16 +5,15 @@
  *      Author: Tiffany Huang
  */
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedMacroInspection"
 #define _USE_MATH_DEFINES
-#include <random>
-#include <algorithm>
-#include <iostream>
-#include <numeric>
 #include <cmath>
+#pragma clang diagnostic pop
+
+#include <random>
 #include <iostream>
 #include <sstream>
-#include <string>
-#include <iterator>
 
 #include "particle_filter.h"
 
@@ -49,13 +48,13 @@ void ParticleFilter::init(double x, double y, double theta, const double std[]) 
         particles.push_back(particle);
         weights.push_back(1.0);
 
-        cout << "init(): Sample " << i + 1 << " " << sample_x << " " << sample_y << " " << sample_theta << endl;
+        // cout << "init(): Sample " << i + 1 << " " << sample_x << " " << sample_y << " " << sample_theta << endl;
     }
 
     is_initialized = true;
 }
 
-void ParticleFilter::prediction(double delta_t, double std_pos[], double velocity, double yaw_rate) {
+void ParticleFilter::prediction(double delta_t, const double std_pos[], double velocity, double yaw_rate) {
     // Adds measurements to each particle and add random Gaussian noise.
     // NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
     //  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
@@ -94,17 +93,23 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
     }
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {
-    // TODO: Find the predicted measurement that is closest to each observed measurement and assign the 
+#pragma clang diagnostic pop
+    // Find the predicted measurement that is closest to each observed measurement and assign the
     //   observed measurement to this particular landmark.
     // NOTE: this method will NOT be called by the grading code. But you will probably find it useful to 
     //   implement this method and use it as a helper during the updateWeights phase.
 
 }
+#pragma clang diagnostic pop
 
-void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
+void ParticleFilter::updateWeights(double sensor_range, const double std_landmark[],
         const std::vector<LandmarkObs> &observations, const Map &map_landmarks) {
-    // TODO: Update the weights of each particle using a multi-variate Gaussian distribution. You can read
+    // Update the weights of each particle using a multi-variate Gaussian distribution. You can read
     //   more about this distribution here: https://en.wikipedia.org/wiki/Multivariate_normal_distribution
     // NOTE: The observations are given in the VEHICLE'S coordinate system. Your particles are located
     //   according to the MAP'S coordinate system. You will need to transform between the two systems.
@@ -120,27 +125,29 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     //   Use setAssociations() to set associations
     //   Update weights[i] and particles[i].weight
     for (int p = 0; p < num_particles; p++) {
-        vector<int> associations;
-        vector<double> sense_x;
-        vector<double> sense_y;
-
+        Particle &particle = particles[p];
+        
         vector<LandmarkObs> trans_observations;
         for (int i = 0; i < observations.size(); i++) {
-            LandmarkObs obs = observations[i];
+            const LandmarkObs &obs = observations[i];
 
             // vehicle-to-map coordinate space transformation
-            const double theta = particles[p].theta;
-            double obs_x = particles[p].x + (obs.x * cos(theta) - obs.y * sin(theta));
-            double obs_y = particles[p].y + (obs.x * sin(theta) + obs.y * cos(theta));
+            const double theta = particle.theta;
+            double obs_x = particle.x + (obs.x * cos(theta) - obs.y * sin(theta));
+            double obs_y = particle.y + (obs.x * sin(theta) + obs.y * cos(theta));
             LandmarkObs trans_obs(i, obs_x, obs_y);
             trans_observations.push_back(trans_obs);
         }
 
+        vector<int> associations;
+        vector<double> sense_x;
+        vector<double> sense_y;
+
         // Initialize weight to 1.0, then scale it per-observation further down
-        particles[p].weight = 1.0;
+        particle.weight = 1.0;
 
         // if there are no observations, keep previous weights
-        for (int i = 0; i < trans_observations.size(); i++) {
+        for (const auto &trans_observation : trans_observations) {
             double closest_dist = sensor_range;
             int association = -1;
 
@@ -150,8 +157,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
                 // using euclidean distance for simplicity, could be adjusted for sensor-noise-distribution
                 double calc_dist =
-                        sqrt(pow(trans_observations[i].x - landmark_x, 2.0)
-                             + pow(trans_observations[i].y - landmark_y, 2.0));
+                        sqrt(pow(trans_observation.x - landmark_x, 2.0)
+                             + pow(trans_observation.y - landmark_y, 2.0));
                 if (calc_dist < closest_dist) {
                     closest_dist = calc_dist;
                     association = j;
@@ -159,8 +166,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
             }
 
             if (association != -1) {
-                double meas_x = trans_observations[i].x;
-                double meas_y = trans_observations[i].y;
+                double meas_x = trans_observation.x;
+                double meas_y = trans_observation.y;
                 double mu_x = map_landmarks.landmark_list[association].x_f;
                 double mu_y = map_landmarks.landmark_list[association].y_f;
                 // From Lesson 15: Implementation of a Particle Filter - 18. Quiz: Particle Weights
@@ -171,19 +178,19 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                             * exp(-(pow(meas_x - mu_x, 2.0) / (2 * pow(std_x, 2.0))
                                     + pow(meas_y - mu_y, 2.0) / (2 * pow(std_y, 2.0))));
                 if (multiplier >= 0.0) {
-                    particles[p].weight *= multiplier;
+                    particle.weight *= multiplier;
                 }
                 associations.push_back(association + 1);
-                sense_x.push_back(trans_observations[i].x);
-                sense_y.push_back(trans_observations[i].y);
+                sense_x.push_back(trans_observation.x);
+                sense_y.push_back(trans_observation.y);
             } else {
                 // remove any non-associated particles
-                particles[p].weight = 0.0;
+                particle.weight = 0.0;
             }
         }
 
-        particles[p] = SetAssociations(particles[p], associations, sense_x, sense_y);
-        weights[p] = particles[p].weight;
+        particle = SetAssociations(particle, associations, sense_x, sense_y);
+        weights[p] = particle.weight;
     }
 }
 
@@ -192,7 +199,7 @@ void ParticleFilter::resample() {
     // Based on python resampling-algorithm in
     // Lesson 14: Particle filters - 20. Quiz: Resampling Wheel - answer
 
-    // TODO if gen and distribution are heavy-weight(?) turn them into singletons
+    // if gen and distribution are too heavy-weight, turn them into singletons
     default_random_engine gen;
     // See http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
     discrete_distribution<int> distribution(weights.begin(), weights.end());
@@ -216,16 +223,10 @@ Particle ParticleFilter::SetAssociations(Particle& particle, const std::vector<i
     // sense_x: the associations x mapping already converted to world coordinates
     // sense_y: the associations y mapping already converted to world coordinates
 
-    // TODO are .clear() really required? assignment overwrites everything?
-    particle.associations.clear();
-    particle.sense_x.clear();
-    particle.sense_y.clear();
-
     particle.associations = associations;
     particle.sense_x = sense_x;
     particle.sense_y = sense_y;
 
-    // TODO return particle. The argument one?
     return particle;
 }
 
@@ -256,4 +257,3 @@ string ParticleFilter::getSenseY(Particle best)
     s = s.substr(0, s.length()-1);  // get rid of the trailing space
     return s;
 }
-
