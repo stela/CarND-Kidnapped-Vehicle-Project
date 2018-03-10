@@ -205,7 +205,7 @@ void ParticleFilter::resample() {
     // See http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
     discrete_distribution<int> distribution(weights.begin(), weights.end());
 
-    // double-buffer particles instead in case allocating and copying proves too slow
+    // double-buffer particles vectors instead in case allocating and moving proves too slow
     vector<Particle> resample_particles;
     resample_particles.reserve(particles.size());
     for (const auto &ignore : particles) {
@@ -213,7 +213,7 @@ void ParticleFilter::resample() {
         resample_particles.push_back(particles[distribution(gen)]);
     }
 
-    particles = resample_particles;
+    particles = std::move(resample_particles);
 }
 
 Particle ParticleFilter::SetAssociations(Particle& particle, const std::vector<int>& associations, 
