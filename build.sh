@@ -1,5 +1,5 @@
 #!/bin/bash -xe
-# Script to build all components from scratch, using the maximum available CPU power
+# Script to build all components from scratch
 #
 # Given parameters are passed over to CMake.
 # Examples:
